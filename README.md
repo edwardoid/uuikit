@@ -9,16 +9,16 @@ The main idea of this project is to provide minimal set of widgets to build UI f
 
 Since the project is in active development stage, some widgets are planned but not implemented yet. Here is the list of widgets *implemented* and planned.
 
-| Widget      | Rendering          | Selection | Focus |
-|-------------|--------------------|-----------|-------|
-| Label       | :heavy_check_mark: | :x:       | :x:   |
-| PushButton  | :heavy_check_mark: | :soon:    | :x:   |
-| CheckBox    | :heavy_check_mark: | :soon:    | :x:   |
-| Menu        | :heavy_check_mark: | :soon:    | :x:   |
-| Pixmap      | :heavy_check_mark: | :x:       | :x:   |
-| ProgressBar | :x:                | :x:       | :x:   |
-| Slider      | :x:                | :x:       | :x:   |
-| Dialog      | :x:                | :x:       | :x:   |
+| Widget      | Rendering          | Selection          | Focus              |
+|-------------|--------------------|--------------------|--------------------|
+| Label       | :heavy_check_mark: | :x:                | :x:                |
+| PushButton  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| CheckBox    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Menu        | :heavy_check_mark: | :x:                | :x:                |
+| Pixmap      | :heavy_check_mark: | :x:                | :x:                |
+| ProgressBar | :x:                | :x:                | :x:                |
+| Slider      | :x:                | :x:                | :x:                |
+| Dialog      | :x:                | :x:                | :x:                |
 
 :heavy_check_mark: — Implemented, available
 
