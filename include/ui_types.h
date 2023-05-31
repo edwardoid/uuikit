@@ -22,6 +22,32 @@ enum text_size_t: uint8_t
     huge
 };
 
+enum class user_input_t: uint8_t
+{
+           num_0 = 0,
+    num_1, num_2, num_3,
+    num_4, num_5, num_6,
+    num_7, num_8, num_9,
+
+    key_a, key_b, key_c,
+    key_d, key_e, key_f,
+    key_g, key_h, key_i,
+    key_j, key_k, key_l,
+    key_m, key_n, key_o,
+    key_p, key_q, key_r,
+    key_s, key_t, key_u,
+    key_v, key_w, key_x,
+    key_y, key_z,
+
+    key_dot /* . */, key_at /* @ */,
+
+    key_released,
+    key_pressed,
+    key_long_pressed,
+    key_increment,
+    key_decrement
+};
+
 template<typename T, uint8_t SizeValue>
 class FixedSizeArray
 {
