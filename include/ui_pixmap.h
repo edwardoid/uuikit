@@ -6,6 +6,5 @@
 struct Pixmap
 {
     byte_t* img;
-    dim_t   width;
-    dim_t     height; 
+    dim_t   sz;
 };
