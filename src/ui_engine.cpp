@@ -20,7 +20,7 @@ Engine::Engine(U8G2* device)
         .menuBoxHeight = 18,
         .minimalOffset = 4,
         .toggleSize = 10,
-        .regular = u8g2_font_frigidaire_mr,
+        .regular = u8g2_font_prospero_nbp_tr, // u8g2_font_prospero_nbp_tr
         .small = u8g2_font_6x10_tf,
         .symbols = u8g2_font_unifont_t_symbols
     }
@@ -35,19 +35,28 @@ Engine::Engine(U8G2* device)
 
     m_dev->setFont(m_st.small);
     m_st.smallHeight = m_dev->getMaxCharHeight();
+
+    m_screens.fill(nullptr);
+}
+
+void Engine::input(user_input_t key)
+{
+    if (m_current < m_screensCount)
+        m_screens[m_current]->handle(key);
 }
 
 bool Engine::render()
 {
     ESP_LOGI(TAG, "Rendering screen %d", m_current);
-    if (m_current < 0)
+    if (m_screensCount < m_current)
         return false;
+    bool ret = true;
     
     m_dev->firstPage();
-    bool ret = false;
     do {
-        ret = renderScreen(* m_screens[m_current]);
+        renderScreen(* m_screens[m_current]);
     } while( m_dev->nextPage() );
+    //m_dev->sendBuffer();
     return ret;
 }
 
@@ -83,36 +92,58 @@ bool Engine::renderUnknown(const Element* element)
 
 bool Engine::renderButton(const PushButton& src)
 {
-    m_dev->setFont(u8g2_font_ncenB14_tr);
-    uint8_t textW = src.text == nullptr ? 0 : m_dev->getStrWidth(src.text);
-    uint8_t h = max(m_dev->getMaxCharHeight(), src.icon == nullptr ? 0 : src.icon->height)  + 2 * m_st.minimalOffset;
-    if (src.text != nullptr)
-    {
-        m_dev->setFont(u8g2_font_ncenB14_tr);
-        m_dev->drawStr(m_st.minimalOffset, m_y + m_st.menuFontSize + m_st.minimalOffset, src.text);
-    }
+    m_dev->setDrawColor(1);
+    if (src.flags & flags_t::selected)
+        m_dev->drawRBox(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
+    else
+        m_dev->drawRFrame(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
 
-    uint8_t w = textW + (src.icon == nullptr ? m_st.minimalOffset : (m_st.minimalOffset + src.icon->height)) + 2 * m_st.minimalOffset;
-    
-    m_dev->drawRFrame(0, m_y, w, h, m_st.minimalOffset);
+    m_dev->setFont(m_st.regular);
+    m_dev->setFontPosCenter();
+
+    if (src.flags & flags_t::selected)
+        m_dev->setDrawColor(0);
+
+    m_dev->drawUTF8(src.bounds.x + m_st.minimalOffset + m_st.minimalOffset + src.icon->width, src.bounds.vcenter(), src.text);
+
+    m_dev->drawBitmap(src.bounds.x + + m_st.minimalOffset,
+            src.bounds.y + (src.bounds.h - src.icon->height) / 2, src.icon->height / 8, src.icon->width, src.icon->img);
     return true;
 }
 
 bool Engine::renderToggle(const Toggle& src)
 {
+    m_dev->setDrawColor(1);
+    if (src.flags & flags_t::selected)
+        m_dev->drawRBox(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
+    else
+        m_dev->drawRFrame(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
+
     m_dev->setFont(m_st.regular);
     m_dev->setFontPosCenter();
+
+    if (src.flags & flags_t::selected)
+        m_dev->setDrawColor(0);
+
     m_dev->drawUTF8(src.bounds.x + m_st.minimalOffset, src.bounds.vcenter(), src.text);
 
-    m_dev->setFont(m_st.symbols);
-    m_dev->setFontPosCenter();
-    dim_t symbolWidth = 15;
-    if (src.value)
-        m_dev->drawGlyph(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), CHECKED_SYMBOL);
-    else
-        m_dev->drawGlyph(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), UNCHECKED_SYMBOL);
+    //m_dev->setFont(m_st.symbols);
+    //m_dev->setFontPosCenter();
+    // dim_t symbolWidth = 16;
+    // if (src.value)
+    //     m_dev->drawUTF8(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), "X");
+    // else
+    //     m_dev->drawUTF8(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), "O");
 
-    m_dev->drawRFrame(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
+
+    m_dev->setFont(m_st.symbols);
+    //m_dev->setFontPosCenter();
+    dim_t symbolWidth = 16;
+    if (src.value)
+        m_dev->drawGlyph(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter() + 2, CHECKED_SYMBOL);
+    else
+        m_dev->drawGlyph(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter() + 2, UNCHECKED_SYMBOL);
+
 
     return true;
 }
@@ -144,5 +175,9 @@ bool Engine::renderLabel(const Label& src)
 
 bool Engine::renderMenu(const Menu& src)
 {
+    for(int i = 0; i < src.childrenCount(); ++i)
+    {
+        renderUnknown(src.children()[i]);
+    }
     return true;
 }

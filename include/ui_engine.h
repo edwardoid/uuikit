@@ -11,16 +11,19 @@
 #include "ui_label.h"
 #include "ui_menu.h"
 
+#include <array>
+
 class Engine
 {
 public:
-    using ScreensArray = FixedSizeArray<Screen*, 10>;
+    using ScreensArray = std::array<Screen*, 10>;
     Engine(U8G2* device);
     void begin();
-    uint8_t addScreen(Screen* screen) { m_screens[m_screensCount] = screen; return m_screensCount++;};
-    void setCurrentScreen(Screen* screen) { m_current = m_screens.indexOf(screen); }
+    void addScreen(Screen* screen) { m_screens[m_screensCount++] = screen; };
+    void setCurrentScreen(uint8_t index) { m_current = index; }
     bool render();
     inline const UIStyle& style() const { return m_st; }
+    void input(user_input_t key);
 private:
     bool renderScreen(const Screen& screen);
     bool renderButton(const PushButton& button);
@@ -33,7 +36,7 @@ private:
     pos_t m_y = 0;
     struct U8G2* m_dev = nullptr;
     UIStyle m_st;
-    int8_t m_current = -1;
+    uint8_t m_current = 0;
     uint8_t m_screensCount = 0;
     ScreensArray m_screens;
 };
