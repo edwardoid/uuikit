@@ -19,7 +19,8 @@ enum element_type_t: uint8_t
 enum flags_t: uint8_t
 {
     visible = 0x01,
-    enabled = 0x02
+    enabled = 0x02,
+    selected = 0x04
 };
 
 enum class h_alignment_t: uint8_t
@@ -69,6 +70,13 @@ public:
     element_type_t type;
     uint8_t flags = flags_t::visible | flags_t::enabled;
     Box bounds;
+    inline void select(bool select)
+    {
+        flags = select
+                    ? ( flags | flags_t::selected )
+                    : ( flags & ~(flags_t::selected));
+    }
+    virtual bool handle(const user_input_t key) { return false; }
     virtual void calculateBounds(const Box& within, const UIStyle& style, struct U8G2* device) { }
     virtual void calculateAligment(const Box& within);
 };
