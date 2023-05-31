@@ -21,6 +21,8 @@ void PushButton::calculateBounds(const Box& within, const UIStyle& style, U8G2* 
     else
         bounds.h = style.regularHeight + style.minimalOffset * 2;
 
+    bounds.h -= 2;
+
     device->setFont(style.regular);
     if (text != nullptr)
         bounds.w += device->getUTF8Width(text);

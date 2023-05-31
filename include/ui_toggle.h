@@ -2,9 +2,12 @@
 
 #include "ui_push_button.h"
 
-struct Toggle: public PushButton
+class Toggle: public PushButton
 {
+public:
     Toggle();
+    virtual ~Toggle() {}
     virtual void calculateBounds(const Box& within, const UIStyle& style, U8G2* device) override;
-    bool value = false;
-};
+    virtual bool handle(const user_input_t key) override;
+    bool value;
+};  
