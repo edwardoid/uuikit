@@ -7,13 +7,13 @@
 class Menu: public Element
 {
 public:
-    using EntriesContainer = std::array<Element*, 5>;
+    using EntriesContainer = std::array<Element*, 10>;
     Menu();
     ~Menu() = default;
 
     void add(Element* e);
-    uint8_t childrenCount() const { return m_childrenCount; }
-    const EntriesContainer& children() const { return m_children; }
+    inline uint8_t childrenCount() const { return m_childrenCount; }
+    inline const EntriesContainer& children() const { return m_children; }
     inline uint8_t selected() const { return m_selectedEntry; }
     inline void select(uint8_t entry) { m_selectedEntry = entry; m_children[entry]->select(true); }
     virtual bool handle(const user_input_t key);
