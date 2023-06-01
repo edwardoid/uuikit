@@ -4,26 +4,17 @@
 #include <U8g2lib.h>
 
 PushButton::PushButton()
-{
-    type = element_type_t::button;
-}
+{}
 
-void PushButton::calculateBounds(const Box& within, const UIStyle& style, U8G2* device)
+bool PushButton::handle(const user_input_t key, const UIStyle& style)
 {
-    bounds.x = within.x;
-    bounds.y = within.y;
-    bounds.w = style.minimalOffset * 2;
-    if (icon != nullptr)
+    if (key == user_input_t::key_pressed || key == user_input_t::key_long_pressed)
     {
-        bounds.w += icon->sz + style.minimalOffset;
-        bounds.h = style.minimalOffset * 2 + ui_max(style.regularHeight, icon->sz);
+        if (on_click != nullptr)
+        {
+            on_click();
+            return true;
+        }
     }
-    else
-        bounds.h = style.regularHeight + style.minimalOffset * 2;
-
-    bounds.h -= 2;
-
-    device->setFont(style.regular);
-    if (text != nullptr)
-        bounds.w += device->getUTF8Width(text);
+    return false;
 }

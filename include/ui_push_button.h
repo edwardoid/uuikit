@@ -1,15 +1,12 @@
 #pragma once
 
-#include "ui_pixmap.h"
-#include "ui_element.h"
-#include "ui_label.h"
-#include <string>
+#include "ui_button_base.h"
+#include <functional>
 
-struct PushButton: public Element
+class PushButton: public ButtonBase
 {
+public:
     PushButton();
-    virtual void calculateBounds(const Box& within, const UIStyle& style, U8G2* device) override;
-    const char* text = nullptr;
-    Pixmap* icon = nullptr;
-    Label*  label = nullptr;
+    virtual bool handle(const user_input_t key, const UIStyle& style) override;
+    std::function<void(void)> on_click;
 };

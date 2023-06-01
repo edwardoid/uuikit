@@ -25,6 +25,6 @@ bool Toggle::handle(const user_input_t key, const UIStyle& style)
 
 void Toggle::calculateBounds(const Box& within, const UIStyle& style, U8G2* device)
 {
-    PushButton::calculateBounds(within, style, device);
+    ButtonBase::calculateBounds(within, style, device);
     bounds.w += style.minimalOffset + style.symbolsHeight;
 }

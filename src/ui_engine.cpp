@@ -40,7 +40,8 @@ Engine::Engine(U8G2* device)
 void Engine::input(user_input_t key)
 {
     if (m_current < m_screensCount)
-        m_screens[m_current]->handle(key, m_st);
+        if(m_screens[m_current]->handle(key, m_st))
+            render();
 }
 
 bool Engine::render()
@@ -87,7 +88,7 @@ bool Engine::renderUnknown(const Element* element)
     return false;
 }
 
-bool Engine::renderButton(const PushButton& src)
+bool Engine::renderButton(const ButtonBase& src)
 {
     m_dev->setDrawColor(1);
     if (src.flags & flags_t::selected)

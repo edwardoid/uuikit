@@ -6,7 +6,7 @@
 
 #include "ui_style.h"
 #include "ui_screen.h"
-#include "ui_push_button.h"
+#include "ui_button_base.h"
 #include "ui_toggle.h"
 #include "ui_label.h"
 #include "ui_menu.h"
@@ -26,7 +26,7 @@ public:
     void input(user_input_t key);
 private:
     bool renderScreen(const Screen& screen);
-    bool renderButton(const PushButton& button);
+    bool renderButton(const ButtonBase& button);
     bool renderToggle(const Toggle& toggle);
     bool renderLabel(const Label& toggle);
     bool renderMenu(const Menu& toggle);

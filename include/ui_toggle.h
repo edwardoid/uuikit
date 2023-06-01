@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ui_push_button.h"
+#include "ui_button_base.h"
 
-class Toggle: public PushButton
+class Toggle: public ButtonBase
 {
 public:
     Toggle();
