@@ -19,8 +19,8 @@ public:
     using ScreensArray = std::array<Screen*, 10>;
     Engine(U8G2* device);
     void begin();
-    void addScreen(Screen* screen) { m_screens[m_screensCount++] = screen; };
-    void setCurrentScreen(uint8_t index) { m_current = index; }
+    inline void addScreen(Screen* screen) { m_screens[m_screensCount++] = screen; };
+    inline void setCurrentScreen(uint8_t index) { m_current = index; }
     bool render();
     inline const UIStyle& style() const { return m_st; }
     void input(user_input_t key);
@@ -32,8 +32,6 @@ private:
     bool renderMenu(const Menu& toggle);
     bool renderUnknown(const Element* elem);
 private:
-    pos_t m_x = 0;
-    pos_t m_y = 0;
     struct U8G2* m_dev = nullptr;
     UIStyle m_st;
     uint8_t m_current = 0;

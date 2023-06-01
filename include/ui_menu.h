@@ -16,8 +16,17 @@ public:
     inline const EntriesContainer& children() const { return m_children; }
     inline uint8_t selected() const { return m_selectedEntry; }
     inline void select(uint8_t entry) { m_selectedEntry = entry; m_children[entry]->select(true); }
-    virtual bool handle(const user_input_t key);
+    virtual bool handle(const user_input_t key, const UIStyle& style);
     virtual void calculateBounds(const Box& within, const UIStyle& style, struct U8G2* device) override;
+protected:
+    friend class Engine;
+    struct RenderData
+    {
+        uint8_t currentItem = 0;
+        pos_t  yOffset = 0;
+    };
+
+    RenderData renderData;
 private:
     EntriesContainer m_children;
     uint8_t m_childrenCount = 0;

@@ -76,7 +76,7 @@ public:
                     ? ( flags | flags_t::selected )
                     : ( flags & ~(flags_t::selected));
     }
-    virtual bool handle(const user_input_t key) { return false; }
+    virtual bool handle(const user_input_t key, const UIStyle& style) { return false; }
     virtual void calculateBounds(const Box& within, const UIStyle& style, struct U8G2* device) { }
     virtual void calculateAligment(const Box& within);
 };

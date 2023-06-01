@@ -17,38 +17,49 @@ void Menu::add(Element* e)
     ++m_childrenCount;
 }
 
-bool Menu::handle(const user_input_t key)
+bool Menu::handle(const user_input_t key, const UIStyle& style)
 {
     uint8_t current = m_selectedEntry;
     switch(key)
     {
         case user_input_t::key_increment:
         {
-            ++m_selectedEntry;
+            if (m_selectedEntry < m_childrenCount - 1)
+                ++m_selectedEntry;
             break;
         }
 
         case user_input_t::key_decrement:
         {
-            if (m_selectedEntry == 0)
-                m_selectedEntry = m_childrenCount - 1;
-            else
+            if (m_selectedEntry != 0)
                 --m_selectedEntry;
             break;
         }
 
         default:
         {
-            return m_children[m_selectedEntry]->handle(key);
+            return m_children[m_selectedEntry]->handle(key, style);
         }
     }
 
-    m_selectedEntry %= m_childrenCount;
     if (m_children[current] != nullptr)
         m_children[current]->select(false);
     
     if (m_children[m_selectedEntry] != nullptr)
+    {
         m_children[m_selectedEntry]->select(true);
+    }
+
+    pos_t bottom = m_children[m_selectedEntry]->bounds.y + renderData.yOffset + m_children[m_selectedEntry]->bounds.h;
+    if (bottom > bounds.h)
+    {
+        renderData.yOffset -= m_children[renderData.currentItem++]->bounds.h + style.minimalOffset;
+    }
+    if (m_children[m_selectedEntry]->bounds.y + renderData.yOffset < bounds.y)
+    {
+        renderData.yOffset = m_children[m_selectedEntry]->bounds.y * -1 + bounds.y;
+        renderData.currentItem--;
+    }
     return false;
 }
 

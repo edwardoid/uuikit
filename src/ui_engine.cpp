@@ -25,8 +25,6 @@ Engine::Engine(U8G2* device)
         .symbols = u8g2_font_unifont_t_symbols
     }
 {
-    m_x = 1;
-    m_y = 20;
     m_dev->setFont(m_st.regular);
     m_st.regularHeight = m_dev->getMaxCharHeight();
 
@@ -42,7 +40,7 @@ Engine::Engine(U8G2* device)
 void Engine::input(user_input_t key)
 {
     if (m_current < m_screensCount)
-        m_screens[m_current]->handle(key);
+        m_screens[m_current]->handle(key, m_st);
 }
 
 bool Engine::render()
@@ -56,7 +54,6 @@ bool Engine::render()
     do {
         renderScreen(* m_screens[m_current]);
     } while( m_dev->nextPage() );
-    //m_dev->sendBuffer();
     return ret;
 }
 
@@ -104,37 +101,26 @@ bool Engine::renderButton(const PushButton& src)
     if (src.flags & flags_t::selected)
         m_dev->setDrawColor(0);
 
-    m_dev->drawUTF8(src.bounds.x + m_st.minimalOffset + m_st.minimalOffset + src.icon->width, src.bounds.vcenter(), src.text);
+    uint8_t textOffset = 0;
 
-    m_dev->drawBitmap(src.bounds.x + + m_st.minimalOffset,
-            src.bounds.y + (src.bounds.h - src.icon->height) / 2, src.icon->height / 8, src.icon->width, src.icon->img);
+    if (src.icon != nullptr)
+    {
+        textOffset = m_st.minimalOffset + src.icon->sz;
+
+        m_dev->drawBitmap(src.bounds.x + m_st.minimalOffset,
+                          src.bounds.y + (src.bounds.h - src.icon->sz) / 2,
+                          src.icon->sz / 8,
+                          src.icon->sz, src.icon->img);
+    }
+
+    m_dev->drawUTF8(src.bounds.x + m_st.minimalOffset + textOffset, src.bounds.vcenter(), src.text);
+
     return true;
 }
 
 bool Engine::renderToggle(const Toggle& src)
 {
-    m_dev->setDrawColor(1);
-    if (src.flags & flags_t::selected)
-        m_dev->drawRBox(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
-    else
-        m_dev->drawRFrame(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h, m_st.minimalOffset);
-
-    m_dev->setFont(m_st.regular);
-    m_dev->setFontPosCenter();
-
-    if (src.flags & flags_t::selected)
-        m_dev->setDrawColor(0);
-
-    m_dev->drawUTF8(src.bounds.x + m_st.minimalOffset, src.bounds.vcenter(), src.text);
-
-    //m_dev->setFont(m_st.symbols);
-    //m_dev->setFontPosCenter();
-    // dim_t symbolWidth = 16;
-    // if (src.value)
-    //     m_dev->drawUTF8(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), "X");
-    // else
-    //     m_dev->drawUTF8(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter(), "O");
-
+    renderButton(src);
 
     m_dev->setFont(m_st.symbols);
     //m_dev->setFontPosCenter();
@@ -175,9 +161,11 @@ bool Engine::renderLabel(const Label& src)
 
 bool Engine::renderMenu(const Menu& src)
 {
-    for(int i = 0; i < src.childrenCount(); ++i)
+    for(uint8_t i = src.renderData.currentItem; i < src.childrenCount(); ++i)
     {
+        src.children()[i]->bounds.y += src.renderData.yOffset;
         renderUnknown(src.children()[i]);
+        src.children()[i]->bounds.y -= src.renderData.yOffset;
     }
     return true;
 }

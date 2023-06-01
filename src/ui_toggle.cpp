@@ -8,7 +8,7 @@ Toggle::Toggle()
     type = element_type_t::toggle;
 }
 
-bool Toggle::handle(const user_input_t key)
+bool Toggle::handle(const user_input_t key, const UIStyle& style)
 {
     switch(key)
     {
