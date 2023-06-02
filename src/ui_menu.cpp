@@ -51,11 +51,11 @@ bool Menu::handle(const user_input_t key, const UIStyle& style)
     }
 
     pos_t bottom = m_children[m_selectedEntry]->bounds.y + renderData.yOffset + m_children[m_selectedEntry]->bounds.h;
-    if (bottom > bounds.h)
+    if (bottom > (bounds.y + bounds.h))
     {
         renderData.yOffset -= m_children[renderData.currentItem++]->bounds.h + style.minimalOffset;
     }
-    if (m_children[m_selectedEntry]->bounds.y + renderData.yOffset < bounds.y)
+    else if (m_children[m_selectedEntry]->bounds.y + renderData.yOffset < bounds.y)
     {
         renderData.yOffset = m_children[m_selectedEntry]->bounds.y * -1 + bounds.y;
         renderData.currentItem--;

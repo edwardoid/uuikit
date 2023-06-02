@@ -11,9 +11,9 @@ public:
     Screen();
     ~Screen() = default;
 
-    void add(Element* e) { m_children[m_childrenCount++] = e; }
-    uint8_t childrenCount() const { return m_childrenCount; }
-    const ElementsContainer& children() const { return m_children; }
+    inline void add(Element* e) { m_children[m_childrenCount++] = e; }
+    inline uint8_t childrenCount() const { return m_childrenCount; }
+    inline const ElementsContainer& children() const { return m_children; }
     virtual bool handle(const user_input_t key, const UIStyle& style);
 
 private:

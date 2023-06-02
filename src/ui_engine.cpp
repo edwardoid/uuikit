@@ -1,7 +1,8 @@
 #include "ui_engine.h"
 #include "ui_push_button.h"
 #include <esp_log.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <u8g2.h>
 #include <U8g2lib.h>
 #include <string.h>
@@ -10,8 +11,20 @@
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 
-#define UNCHECKED_SYMBOL 9744
-#define CHECKED_SYMBOL   9745
+#define ALARM_SYMBOL           9200
+#define TIMER_SYMBOL           9201
+#define HOURGLASS_SYMBOL       9203
+#define ARROW_LEFT_SYMBOL      9204
+#define ARROW_RIGHT_SYMBOL     9205
+#define ARROW_UP               9206
+#define ARROW_DOWN             9207
+#define PAUSE_SYMBOL           9208
+#define STOP_SYMBOL            9209
+#define REC_SYMBOL             9210
+#define NEXT_SYMBOL            9654
+#define UNCHECKED_SYMBOL       9744
+#define CHECKED_SYMBOL         9745
+#define CHECKED_CROSS_SYMBOL   9746
 
 Engine::Engine(U8G2* device)
     : m_dev(device)
@@ -36,6 +49,15 @@ Engine::Engine(U8G2* device)
 
     m_screens.fill(nullptr);
 }
+
+void Engine::addScreen(Screen* screen)
+{
+    m_screens[m_screensCount++] = screen;
+    screen->calculateBounds({
+        .x = 0, .y = 0,
+        .w = (dim_t) m_dev->getWidth(), .h = (dim_t) m_dev->getHeight()
+    }, m_st, m_dev);
+};
 
 void Engine::input(user_input_t key)
 {
@@ -67,6 +89,8 @@ bool Engine::renderScreen(const Screen& screen)
             continue;
         renderUnknown(e);
     }
+    m_dev->setDrawColor(1);
+    m_dev->drawRBox(0, 0, m_dev->getWidth(), 16, 2);
     return true;
 }
 
@@ -80,6 +104,8 @@ bool Engine::renderUnknown(const Element* element)
             return renderToggle(* (Toggle*)(element));
         case element_type_t::label:
             return renderLabel(* (Label*)(element));
+        case element_type_t::progress:
+            return renderProgress(* (ProgressBar*)(element));
         case element_type_t::menu:
             return renderMenu(* (Menu*)(element));
         default:
@@ -131,7 +157,7 @@ bool Engine::renderToggle(const Toggle& src)
     else
         m_dev->drawGlyph(src.bounds.x + src.bounds.w - m_st.minimalOffset - symbolWidth, src.bounds.vcenter() + 2, UNCHECKED_SYMBOL);
 
-
+    m_dev->setDrawColor(1);
     return true;
 }
 
@@ -157,6 +183,64 @@ bool Engine::renderLabel(const Label& src)
         if (*p != '\0')
             ++p;
     } 
+    return true;
+}
+
+bool Engine::renderProgress(const ProgressBar& src)
+{
+    m_dev->drawFrame(src.bounds.x, src.bounds.y,
+                     src.bounds.w, src.bounds.h);
+
+    float range = src.maxValue() - src.minValue();
+    float progress = (src.maxValue() == src.minValue())
+                            ? 0.
+                            : ((float)(src.value() - src.minValue()) / range);
+
+    if (progress > 0.)
+    {
+        m_dev->drawBox(src.bounds.x, src.bounds.y,
+                       src.bounds.w * progress, src.bounds.h);
+    }
+
+    if (src.options != progress_flags_t::bar_only)
+    {
+        char tmp[32];
+        m_dev->setFont(m_st.small);
+        m_dev->setFontMode(1);
+        m_dev->setDrawColor(2);
+
+        progress_flags_t options = src.options;
+        if (src.text == nullptr && options == progress_flags_t::text_only)
+            options = progress_flags_t::percentage;
+
+        switch(options)
+        {
+            case progress_flags_t::percentage:
+            {
+                sprintf(tmp, "%d%%", (int)(progress * 100));
+                break;
+            }
+            case progress_flags_t::text_only:
+            {
+                strcpy(tmp, src.text);
+                break;
+            }
+            case progress_flags_t::values:
+            {
+                sprintf(tmp, "%d/%d", (int)(src.value()),
+                                     (int)(src.maxValue()));
+                break;
+            }
+            default:
+                return true;
+        }
+
+        uint8_t textWidth = m_dev->getUTF8Width(tmp);
+        m_dev->setFontPosCenter();
+        m_dev->drawUTF8(src.bounds.hcenter() - textWidth / 2,
+                        src.bounds.vcenter() + 1,
+                        tmp);
+    }
     return true;
 }
 

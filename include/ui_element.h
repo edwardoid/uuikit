@@ -12,6 +12,7 @@ enum element_type_t: uint8_t
     pixmap,
     button,
     toggle,
+    progress,
     menu,
     popup
 };
