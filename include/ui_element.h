@@ -13,6 +13,7 @@ enum element_type_t: uint8_t
     button,
     toggle,
     progress,
+    slider,
     menu,
     popup
 };

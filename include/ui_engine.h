@@ -11,6 +11,7 @@
 #include "ui_label.h"
 #include "ui_menu.h"
 #include "ui_progress_bar.h"
+#include "ui_slider.h"
 
 #include <array>
 
@@ -30,6 +31,7 @@ private:
     bool renderButton(const ButtonBase& button);
     bool renderToggle(const Toggle& toggle);
     bool renderProgress(const ProgressBar& progress);
+    bool renderSlider(const Slider& slider);
     bool renderLabel(const Label& toggle);
     bool renderMenu(const Menu& toggle);
     bool renderUnknown(const Element* elem);

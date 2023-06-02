@@ -106,6 +106,8 @@ bool Engine::renderUnknown(const Element* element)
             return renderLabel(* (Label*)(element));
         case element_type_t::progress:
             return renderProgress(* (ProgressBar*)(element));
+        case element_type_t::slider:
+            return renderSlider(* (Slider*)(element));
         case element_type_t::menu:
             return renderMenu(* (Menu*)(element));
         default:
@@ -241,6 +243,20 @@ bool Engine::renderProgress(const ProgressBar& src)
                         src.bounds.vcenter() + 1,
                         tmp);
     }
+    return true;
+}
+
+bool Engine::renderSlider(const Slider& slider)
+{
+    m_dev->drawBox(slider.bounds.x, slider.bounds.y, m_st.minimalOffset, slider.bounds.h);
+    m_dev->drawBox(slider.bounds.x + slider.bounds.w - m_st.minimalOffset, slider.bounds.y, m_st.minimalOffset, slider.bounds.h);
+    m_dev->drawHLine(slider.bounds.x, slider.bounds.vcenter(), slider.bounds.w);
+    dim_t area = slider.bounds.w - 2 * m_st.minimalOffset;
+    float progress = ((float) (slider.value() - slider.minValue())) / (float)(slider.maxValue() - slider.minValue());
+    dim_t offset = area * progress + m_st.minimalOffset / 2;
+    m_dev->drawBox(slider.bounds.x + offset,
+                   slider.bounds.vcenter() - (m_st.minimalOffset / 2),
+                   m_st.minimalOffset, m_st.minimalOffset);
     return true;
 }
 
