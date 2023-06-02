@@ -17,7 +17,7 @@ Since the project is in active development stage, some widgets are planned but n
 | Menu        | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Pixmap      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | ProgressBar | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Slider      | :heavy_check_mark: | :x:                | :x:                |
+| Slider      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Dialog      | :x:                | :x:                | :x:                |
 
 :heavy_check_mark: — Implemented, available
