@@ -22,7 +22,8 @@ enum flags_t: uint8_t
 {
     visible = 0x01,
     enabled = 0x02,
-    selected = 0x04
+    selected = 0x04,
+    editing = 0x08
 };
 
 enum class h_alignment_t: uint8_t

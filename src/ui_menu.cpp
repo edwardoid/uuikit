@@ -19,6 +19,11 @@ void Menu::add(Element* e)
 
 bool Menu::handle(const user_input_t key, const UIStyle& style)
 {
+    if(m_children[m_selectedEntry] != nullptr && (m_children[m_selectedEntry]->flags & flags_t::editing))
+    {
+        m_children[m_selectedEntry]->handle(key, style);
+        return true;
+    }
     uint8_t current = m_selectedEntry;
     switch(key)
     {
