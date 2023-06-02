@@ -190,9 +190,22 @@ bool Engine::renderLabel(const Label& src)
 
 bool Engine::renderProgress(const ProgressBar& src)
 {
+    m_dev->setDrawColor(1);
+
+    if (src.flags & flags_t::selected)
+    {
+        m_dev->drawBox(src.bounds.x, src.bounds.y, src.bounds.w, src.bounds.h);
+    }
+    
     m_dev->drawFrame(src.bounds.x, src.bounds.y,
                      src.bounds.w, src.bounds.h);
 
+    if (src.flags & flags_t::selected)
+    {
+        m_dev->setDrawColor(0);
+    }
+
+                        
     float range = src.maxValue() - src.minValue();
     float progress = (src.maxValue() == src.minValue())
                             ? 0.
@@ -200,8 +213,8 @@ bool Engine::renderProgress(const ProgressBar& src)
 
     if (progress > 0.)
     {
-        m_dev->drawBox(src.bounds.x, src.bounds.y,
-                       src.bounds.w * progress, src.bounds.h);
+        m_dev->drawBox(src.bounds.x + 1, src.bounds.y + 1,
+                       src.bounds.w * progress - 1, src.bounds.h - 2);
     }
 
     if (src.options != progress_flags_t::bar_only)
@@ -248,13 +261,22 @@ bool Engine::renderProgress(const ProgressBar& src)
 
 bool Engine::renderSlider(const Slider& slider)
 {
-    m_dev->drawBox(slider.bounds.x, slider.bounds.y, m_st.minimalOffset, slider.bounds.h);
-    m_dev->drawBox(slider.bounds.x + slider.bounds.w - m_st.minimalOffset, slider.bounds.y, m_st.minimalOffset, slider.bounds.h);
-    m_dev->drawHLine(slider.bounds.x, slider.bounds.vcenter(), slider.bounds.w);
-    dim_t area = slider.bounds.w - 2 * m_st.minimalOffset;
+    if (slider.flags & flags_t::selected)
+    {
+        m_dev->setDrawColor(1);
+        m_dev->drawBox(slider.bounds.x, slider.bounds.y, slider.bounds.w, slider.bounds.h);
+        m_dev->setDrawColor(0);
+    }
+
+    const dim_t padding = 1;
+
+    m_dev->drawBox(slider.bounds.x + padding , slider.bounds.y + padding, m_st.minimalOffset, slider.bounds.h - 2 * padding);
+    m_dev->drawBox(slider.bounds.x + slider.bounds.w - padding - m_st.minimalOffset, slider.bounds.y + padding, m_st.minimalOffset, slider.bounds.h - 2 * padding);
+    m_dev->drawHLine(slider.bounds.x + padding, slider.bounds.vcenter(), slider.bounds.w - 2 * padding);
+    dim_t area = slider.bounds.w - 2 * m_st.minimalOffset - 2 * padding;
     float progress = ((float) (slider.value() - slider.minValue())) / (float)(slider.maxValue() - slider.minValue());
     dim_t offset = area * progress + m_st.minimalOffset / 2;
-    m_dev->drawBox(slider.bounds.x + offset,
+    m_dev->drawBox(slider.bounds.x + offset + padding,
                    slider.bounds.vcenter() - (m_st.minimalOffset / 2),
                    m_st.minimalOffset, m_st.minimalOffset);
     return true;
