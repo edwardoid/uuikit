@@ -6,6 +6,7 @@
 
 #include "ui_style.h"
 #include "ui_screen.h"
+#include "ui_dialog.h"
 #include "ui_button_base.h"
 #include "ui_toggle.h"
 #include "ui_label.h"
@@ -28,6 +29,7 @@ public:
     void input(user_input_t key);
 private:
     bool renderScreen(const Screen& screen);
+    bool renderDialog(const Dialog& screen);
     bool renderButton(const ButtonBase& button);
     bool renderToggle(const Toggle& toggle);
     bool renderProgress(const ProgressBar& progress);

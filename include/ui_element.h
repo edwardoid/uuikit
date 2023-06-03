@@ -15,7 +15,8 @@ enum element_type_t: uint8_t
     progress,
     slider,
     menu,
-    popup
+    dialog,
+    scrollbar
 };
 
 enum flags_t: uint8_t
@@ -54,6 +55,7 @@ struct UIStyle
     dim_t menuFontSize;
     dim_t menuBoxHeight;
     dim_t minimalOffset;
+    dim_t maxOffset;
     int8_t toggleSize;
     const uint8_t  *regular;
     dim_t regularHeight = 0;
@@ -67,6 +69,7 @@ class Element
 {
 public:
     Element() = default;
+    virtual ~Element() = default;
     h_alignment_t align_h = h_alignment_t::left;
     v_alignment_t align_v = v_alignment_t::center;
 
@@ -80,6 +83,6 @@ public:
                     : ( flags & ~(flags_t::selected));
     }
     virtual bool handle(const user_input_t key, const UIStyle& style) { return false; }
-    virtual void calculateBounds(const Box& within, const UIStyle& style, struct U8G2* device) { }
+    virtual void calculateBounds(const Box& within, const UIStyle& style, struct U8G2* device) { bounds = within; }
     virtual void calculateAligment(const Box& within);
 };

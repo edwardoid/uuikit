@@ -9,7 +9,7 @@ class Screen: public Element
 public:
     using ElementsContainer = std::array<Element*, 5>;
     Screen();
-    ~Screen() = default;
+    virtual ~Screen() = default;
 
     inline void add(Element* e) { m_children[m_childrenCount++] = e; }
     inline uint8_t childrenCount() const { return m_childrenCount; }

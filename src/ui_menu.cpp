@@ -75,14 +75,28 @@ void Menu::calculateBounds(const Box& within, const UIStyle& style, U8G2* device
     for (uint8_t i = 0; i < m_childrenCount; ++i)
     {
         Element* e = m_children[i];
-        if (e == nullptr) {
-            break;
-        }
         e->calculateBounds(leftOver, style, device);
         e->bounds.x = leftOver.x;
         e->bounds.w = leftOver.w;
         uint8_t skip = e->bounds.h + style.minimalOffset;
         leftOver.y += skip;
         leftOver.h -= skip;
+    }
+
+    if (m_childrenCount > 0 && (m_children[m_childrenCount-1]->bounds.y + m_children[m_childrenCount-1]->bounds.h) > within.h)
+    {
+        dim_t scrollWidth = style.minimalOffset * 2 + 1;
+        // We need a scrollbar
+        for (uint8_t i = 0; i < m_childrenCount; ++i)
+        {
+            Element* e = m_children[i];
+            e->bounds.w -= style.minimalOffset + 1 + 1;
+            Box b = e->bounds;
+            if (b.w == within.w)
+            {
+                b.w -= scrollWidth;
+                e->calculateBounds(b, style, device);
+            }
+        }
     }
 }
