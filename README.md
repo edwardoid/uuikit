@@ -11,6 +11,7 @@ Since the project is in active development stage, some widgets are planned but n
 
 | Widget      | Rendering          | Selection          | Focus              |
 |-------------|--------------------|--------------------|--------------------|
+| StatusBar   | :x:                | :x:                | :x:                |
 | Label       | :heavy_check_mark: | :x:                | :x:                |
 | PushButton  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | CheckBox    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
@@ -18,7 +19,7 @@ Since the project is in active development stage, some widgets are planned but n
 | Pixmap      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | ProgressBar | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Slider      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Dialog      | :x:                | :x:                | :x:                |
+| Dialog      | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 
 :heavy_check_mark: — Implemented, available
 

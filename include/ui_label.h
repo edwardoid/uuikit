@@ -5,8 +5,9 @@
 
 
 
-struct Label: public Element
+class Label: public Element
 {
+public:
     Label();
     const char* text = nullptr;
     bool        wrap = false;

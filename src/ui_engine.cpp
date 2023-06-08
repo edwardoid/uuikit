@@ -54,31 +54,65 @@ Engine::Engine(U8G2* device)
 void Engine::addScreen(Screen* screen)
 {
     m_screens[m_screensCount++] = screen;
-    screen->calculateBounds({
-        .x = 0, .y = 0,
-        .w = (dim_t) m_dev->getWidth(), .h = (dim_t) m_dev->getHeight()
-    }, m_st, m_dev);
+    if (screen->type == element_type_t::dialog)
+    {
+        screen->calculateBounds({
+            .x = 0, .y = 1,
+            .w = (dim_t)(m_dev->getDisplayWidth()),
+            .h = (dim_t)(m_dev->getDisplayHeight() - 1)
+        }, m_st, m_dev);    
+    }
+    else
+        screen->calculateBounds(contentBox(), m_st, m_dev);
 };
 
 void Engine::input(user_input_t key)
 {
-    if (m_current < m_screensCount)
-        if(m_screens[m_current]->handle(key, m_st))
+    if (m_history.top() < m_screensCount)
+        if(m_screens[m_history.top()]->handle(key, m_st))
             render();
+}
+
+
+Box Engine::contentBox() const {
+    Box b { .x = 0, 
+            .y = 0,
+            .w = (dim_t)m_dev->getDisplayWidth(),
+            .h = (dim_t)(m_dev->getDisplayHeight())
+    };
+
+    if (m_statusBar != nullptr)
+    {
+        b.y += 16;
+        b.h -= b.y;
+    }
+
+    return b;
 }
 
 bool Engine::render()
 {
-    ESP_LOGI(TAG, "Rendering screen %d", m_current);
-    if (m_screensCount < m_current)
+    ESP_LOGI(TAG, "Rendering screen %d", m_history.top());
+    if (m_screensCount < m_history.top())
         return false;
     bool ret = true;
-    
+  
     m_dev->firstPage();
+    if (m_statusBar != nullptr)
+    {
+        renderStatusBar();
+    }
     do {
-        renderScreen(* m_screens[m_current]);
+        renderScreen(* m_screens[m_history.top()]);
     } while( m_dev->nextPage() );
     return ret;
+}
+
+
+void Engine::renderStatusBar()
+{
+    m_dev->setDrawColor(1);
+    m_dev->drawRBox(0, 0, m_dev->getWidth(), 16, 2);
 }
 
 bool Engine::renderScreen(const Screen& screen)
@@ -94,8 +128,6 @@ bool Engine::renderScreen(const Screen& screen)
             continue;
         renderUnknown(e);
     }
-    m_dev->setDrawColor(1);
-    m_dev->drawRBox(0, 0, m_dev->getWidth(), 16, 2);
     return true;
 }
 
@@ -107,7 +139,7 @@ bool Engine::renderDialog(const Dialog& dialog)
     dim_t h = dialog.bounds.h - 2 * m_st.maxOffset;
 
     m_dev->drawRBox(dialog.bounds.x + m_st.maxOffset, dialog.bounds.y + m_st.maxOffset,
-                    w, h, m_st.maxOffset / 2);
+                    w, h, m_st.maxOffset);
 
     m_dev->setDrawColor(1);
 
@@ -147,34 +179,7 @@ bool Engine::renderDialog(const Dialog& dialog)
 
     bounds.y -= bounds.h;
 
-    for(int8_t i = 0; i < buttonsCount; ++i)
-    {
-        for (int8_t j = button = 0; button == 0 && j < 9; ++j)
-        {
-            button = (1 << j) & buttonsInfo;
-        }
 
-        buttonsInfo = buttonsInfo & (~button);
-
-        pos_t textPosY = bounds.vcenter() + 1;
-
-        const char* txt = ((dialog_buttons_t)button == dialog_buttons_t::ok) ? "OK" : 
-                          (((dialog_buttons_t)button == dialog_buttons_t::cancel) ? "Cancel" :
-                           ((dialog_buttons_t)button == dialog_buttons_t::abort) ? "Abort" :
-                           ((dialog_buttons_t)button == dialog_buttons_t::yes) ? "Yes" :
-                           ((dialog_buttons_t)button == dialog_buttons_t::no) ? "No" :
-                           "None");
-
-        bounds.x += spaceForButton;
-
-        m_dev->drawFrame(bounds.x + m_st.minimalOffset, bounds.y, bounds.w - m_st.minimalOffset, bounds.h);
-
-        if (txt != nullptr)
-        {
-            dim_t txtW = m_dev->getUTF8Width(txt);
-            m_dev->drawUTF8(bounds.hcenter() - txtW / 2 + m_st.minimalOffset / 2, textPosY, txt);
-        }
-    }
 
     if (dialog.text() != nullptr)
     {
@@ -191,6 +196,54 @@ bool Engine::renderDialog(const Dialog& dialog)
         l.size = text_size_t::small;
 
         renderLabel(l);
+    }
+
+    for(int8_t i = 0; i < buttonsCount; ++i)
+    {
+        for (int8_t j = button = 0; button == 0 && j < 9; ++j)
+        {
+            button = (1 << j) & buttonsInfo;
+        }
+
+        buttonsInfo = buttonsInfo & (~button);
+
+        pos_t textPosY = bounds.vcenter() + 1;
+
+        const char* txt = ((dialog_buttons_t)button == dialog_buttons_t::ok) ? "OK" : 
+                          (((dialog_buttons_t)button == dialog_buttons_t::cancel) ? "Cancel" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::abort) ? "Abort" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::next) ? "Next" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::previous) ? "Previous" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::yes) ? "Yes" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::no) ? "No" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::accept) ? "Accept" :
+                           ((dialog_buttons_t)button == dialog_buttons_t::dismiss) ? "Dismiss" :
+                           "None");
+
+        bounds.x += spaceForButton;
+
+        if ((uint8_t) dialog.selectedButton() == 0)
+        {
+            (const_cast<Dialog&>(dialog)).handle(user_input_t::key_increment, m_st);
+        }
+
+        if (button == (uint8_t)dialog.selectedButton())
+        {
+            m_dev->setDrawColor(1);
+            m_dev->drawBox(bounds.x + m_st.minimalOffset, bounds.y, bounds.w - m_st.minimalOffset, bounds.h);
+            m_dev->setDrawColor(0);
+        }
+        else
+        {
+            m_dev->setDrawColor(1);
+            m_dev->drawFrame(bounds.x + m_st.minimalOffset, bounds.y, bounds.w - m_st.minimalOffset, bounds.h);
+        }
+
+        if (txt != nullptr)
+        {
+            dim_t txtW = m_dev->getUTF8Width(txt);
+            m_dev->drawUTF8(bounds.hcenter() - txtW / 2 + m_st.minimalOffset / 2, textPosY, txt);
+        }
     }
 
     return true;
@@ -417,7 +470,7 @@ bool Engine::renderMenu(const Menu& src)
 
         const dim_t H2 = H0 * H0 / contentHeight;
         const dim_t scrollHeight = ui_max(1, H2);
-        const dim_t yOffset = src.renderData.yOffset * (H0 - scrollHeight) / contentHeight;
+        dim_t yOffset = src.renderData.yOffset * (H0 - scrollHeight) / contentHeight;
         m_dev->drawBox(x + 1, y - yOffset, ui_max(m_st.minimalOffset - 2, 3), scrollHeight);
     }
 

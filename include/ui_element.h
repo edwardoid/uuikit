@@ -16,7 +16,8 @@ enum element_type_t: uint8_t
     slider,
     menu,
     dialog,
-    scrollbar
+    scrollbar,
+    status_bar
 };
 
 enum flags_t: uint8_t
